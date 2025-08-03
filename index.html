@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVSoundFX-Web - Sound Editor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Variables for Theming */
+        :root, .theme-dark {
+            --color-bg-primary: #111827;
+            --color-bg-secondary: #1f2937;
+            --color-bg-tertiary: #374151;
+            --color-border: #4b5563;
+            --color-text-primary: #d1d5db;
+            --color-text-secondary: #9ca3af;
+            --color-text-muted: #6b7280;
+            --color-accent-yellow: #eab308;
+            --color-accent-yellow-hover: #facc15;
+            --color-accent-blue: #3b82f6;
+            --color-toolbar-bg: rgba(55, 65, 81, 0.5);
+            --color-menu-hover: rgba(0, 0, 0, 0.2);
+            --color-canvas-bar-start: #8b5cf6;
+            --color-canvas-bar-end: #3b82f6;
+            --color-badge-range-bg: rgba(245, 158, 11, 0.2);
+            --color-badge-range-text: #f59e0b;
+            --color-badge-mode-bg: rgba(96, 165, 250, 0.2);
+            --color-badge-mode-text: #60a5fa;
+        }
+
+        .theme-crystal {
+            --color-bg-primary: #f8fafc;
+            --color-bg-secondary: #f1f5f9;
+            --color-bg-tertiary: #ffffff;
+            --color-border: #e2e8f0;
+            --color-text-primary: #1e293b;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            --color-accent-yellow: #0ea5e9;
+            --color-accent-yellow-hover: #0284c7;
+            --color-accent-blue: #0ea5e9;
+            --color-toolbar-bg: rgba(255, 255, 255, 0.8);
+            --color-menu-hover: rgba(0, 0, 0, 0.05);
+            --color-canvas-bar-start: #0ea5e9;
+            --color-canvas-bar-end: #38bdf8;
+            --color-badge-range-bg: rgba(14, 165, 233, 0.2);
+            --color-badge-range-text: #0ea5e9;
+            --color-badge-mode-bg: rgba(71, 85, 105, 0.2);
+            --color-badge-mode-text: #475569;
+        }
+
+        .theme-coleco {
+            --color-bg-primary: #0f0f0f;
+            --color-bg-secondary: #1a1a1a;
+            --color-bg-tertiary: #2a2a2a;
+            --color-border: #404040;
+            --color-text-primary: #ffd500;
+            --color-text-secondary: #ffea80;
+            --color-text-muted: #cc8800;
+            --color-accent-yellow: #ffd500;
+            --color-accent-yellow-hover: #ffea00;
+            --color-accent-blue: #ff6b35;
+            --color-toolbar-bg: linear-gradient(90deg, #d32f2f 0%, #ff9800 25%, #ffd500 50%, #4caf50 75%, #2196f3 100%);
+            --color-menu-hover: rgba(255, 213, 0, 0.2);
+            --color-canvas-bar-start: #ff6b35;
+            --color-canvas-bar-end: #ffd500;
+            --color-badge-range-bg: rgba(255, 107, 53, 0.3);
+            --color-badge-range-text: #ff6b35;
+            --color-badge-mode-bg: rgba(255, 213, 0, 0.3);
+            --color-badge-mode-text: #ffd500;
+        }
+
+        /* Base component styles */
+        body {
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            transition: all 0.3s ease;
+        }
+
+        /* Crystal theme special effects */
+        .theme-crystal {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .theme-crystal .app {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .theme-crystal .menu-dropdown {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Coleco theme special effects */
+        .theme-coleco {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #0f0f0f 100%);
+        }
+
+        .theme-coleco .app {
+            box-shadow: 0 0 50px rgba(255, 213, 0, 0.3);
+            border: 2px solid var(--color-accent-yellow);
+        }
+
+        .theme-coleco #toolbar {
+            background: var(--color-toolbar-bg);
+            animation: rainbow-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes rainbow-glow {
+            0% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 213, 0, 0.7); }
+            100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
+        }
+
+        /* Menu styles */
+        .menu-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            color: var(--color-text-primary);
+            background: transparent;
+            border: none;
+            font-size: 14px;
+        }
+
+        .menu-btn:hover {
+            background: var(--color-menu-hover);
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            width: 220px;
+            padding: 8px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .menu-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .menu-dropdown-item {
+            width: 100%;
+            text-align: left;
+            padding: 8px 12px;
+            color: var(--color-text-primary);
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .menu-dropdown-item:hover {
+            background: var(--color-menu-hover);
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: 4px 0;
+        }
+
+        /* Language buttons */
+        .lang-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn:hover {
+            background: var(--color-menu-hover);
+        }
+
+        .lang-btn.active {
+            background: var(--color-accent-blue);
+            color: white;
+            border-color: var(--color-accent-blue);
+        }
+
+        /* Form controls */
+        .form-select {
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-select:focus {
+            border-color: var(--color-accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Info badges */
+        .info-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            background: var(--color-badge-range-bg);
+            color: var(--color-badge-range-text);
+        }
+
+        .info-badge.mode {
+            background: var(--color-badge-mode-bg);
+            color: var(--color-badge-mode-text);
+        }
+
+        /* Scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--color-bg-secondary);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-muted);
+        }
+
+        /* Modal styles */
+        .modal-content {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-crystal .modal-content {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Toolbar separator */
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--color-border);
+        }
+
+        @media (max-width: 768px) {
+            .toolbar-separator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app max-w-7xl mx-auto flex flex-col h-screen shadow-2xl">
+        <!-- Header / Menu Bar -->
+        <header class="relative flex items-center justify-between h-10 px-4 border-b border-[var(--color-border)] select-none z-20" style="background: var(--color-bg-tertiary);">
+            <!-- Menu Items Container -->
+            <div class="flex items-center space-x-1">
+                <!-- File Menu -->
+                <div class="relative">
+                    <button class="menu-btn" data-menu="file" data-i18n="menu.file">File</button>
+                    <div id="file-menu" class="menu-dropdown">
+                        <button data-action="new" class="menu-dropdown-item">
+                            <i class="fas fa-file fa-fw"></i>
+                            <span data-i18n="menu.newSound">New Sound</span>
+                        </button>
+                        <div class="menu-divider"></div>
+                        <button data-action="open" class="menu-dropdown-item">
+                            <i class="fas fa-folder-open fa-fw"></i>
+                            <span data-i18n="menu.open">Open...</span>
+                        </button>
+                        <button data-action="save" class="menu-dropdown-item">
+                            <i class="fas fa-save fa-fw"></i>
+                            <span data-i18n="menu.save">Save</span>
+                        </button>
+                        <div class="menu-divider"></div>
+                        <button data-action="demo-spaceship" class="menu-dropdown-item">
+                            <i class="fas fa-rocket fa-fw"></i>
+                            <span data-i18n="menu.importSpaceship">Import Spaceship</span>
+                        </button>
+                        <button data-action="demo-laser" class="menu-dropdown-item">
+                            <i class="fas fa-bolt fa-fw"></i>
+                            <span data-i18n="menu.importLaser">Import Laser</span>
+                        </button>
+                        <button data-action="demo-explosion" class="menu-dropdown-item">
+                            <i class="fas fa-bomb fa-fw"></i>
+                            <span data-i18n="menu.importExplosion">Import Explosion</span>
+                        </button>
+                        <div class="menu-divider"></div>
+                        <button data-action="export" class="menu-dropdown-item">
+                            <i class="fas fa-code fa-fw"></i>
+                            <span data-i18n="menu.exportAsm">Export ASM...</span>
+                        </button>
+                        <button data-action="export-cvbasic" class="menu-dropdown-item">
+                            <i class="fas fa-file-code fa-fw"></i>
+                            <span data-i18n="menu.exportCvbasic">Export CVBASIC...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Edit Menu -->
+                <div class="relative">
+                    <button class="menu-btn" data-menu="edit" data-i18n="menu.edit">Edit</button>
+                    <div id="edit-menu" class="menu-dropdown">
+                        <button data-action="clear" class="menu-dropdown-item">
+                            <i class="fas fa-trash fa-fw"></i>
+                            <span data-i18n="menu.clearAll">Clear All</span>
+                        </button>
+                        <button data-action="select-all" class="menu-dropdown-item">
+                            <i class="fas fa-expand-arrows-alt fa-fw"></i>
+                            <span data-i18n="menu.selectAll">Select All Range</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Theme Menu -->
+                <div class="relative">
+                    <button class="menu-btn" data-menu="theme" data-i18n="menu.theme">Theme</button>
+                    <div id="theme-menu" class="menu-dropdown">
+                        <button data-theme="theme-dark" class="theme-btn menu-dropdown-item" data-i18n="theme.dark">Dark</button>
+                        <button data-theme="theme-crystal" class="theme-btn menu-dropdown-item" data-i18n="theme.crystal">Crystal</button>
+                        <button data-theme="theme-coleco" class="theme-btn menu-dropdown-item" data-i18n="theme.coleco">ColecoVision</button>
+                    </div>
+                </div>
+
+                <!-- Help Menu -->
+                <div class="relative">
+                    <button class="menu-btn" data-menu="help" data-i18n="menu.help">Help</button>
+                    <div id="help-menu" class="menu-dropdown">
+                        <button data-action="controls" class="menu-dropdown-item">
+                            <i class="fas fa-keyboard fa-fw"></i>
+                            <span data-i18n="menu.controls">Controls Guide</span>
+                        </button>
+                        <button data-action="about" class="menu-dropdown-item">
+                            <i class="fas fa-info-circle fa-fw"></i>
+                            <span data-i18n="menu.about">About</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Language Selector -->
+            <div class="flex items-center space-x-1">
+                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="fr">FR</button>
+                <button class="lang-btn" data-lang="es">ES</button>
+            </div>
+        </header>
+
+        <!-- Toolbar -->
+        <div id="toolbar" class="flex items-center flex-wrap gap-x-4 gap-y-2 p-3 h-auto border-b border-[var(--color-border)]" style="background: var(--color-toolbar-bg);">
+            <!-- Play/Stop Controls -->
+            <div class="flex items-center gap-x-2">
+                <button id="playBtn" class="btn-primary bg-green-600 hover:bg-green-700">
+                    <i class="fas fa-play"></i>
+                    <span data-i18n="toolbar.play">Play</span>
+                </button>
+                <button id="stopBtn" class="btn-primary bg-red-600 hover:bg-red-700">
+                    <i class="fas fa-stop"></i>
+                    <span data-i18n="toolbar.stop">Stop</span>
+                </button>
+            </div>
+
+            <div class="toolbar-separator hidden md:block"></div>
+
+            <!-- Mode Controls -->
+            <div class="flex items-center gap-x-2 flex-wrap">
+                <select id="soundMode" class="form-select">
+                    <option value="0" data-i18n="toolbar.tone">Tone</option>
+                    <option value="1" data-i18n="toolbar.periodicNoise">Periodic Noise</option>
+                    <option value="2" data-i18n="toolbar.whiteNoise">White Noise</option>
+                </select>
+                <select id="cursorMode" class="form-select">
+                    <option value="0" data-i18n="toolbar.frequency">Frequency</option>
+                    <option value="1" data-i18n="toolbar.volume">Volume</option>
+                    <option value="2" data-i18n="toolbar.start">Start</option>
+                    <option value="3" data-i18n="toolbar.end">End</option>
+                </select>
+                <select id="frequencyMode" class="form-select">
+                    <option value="0" data-i18n="toolbar.freeHand">Free Hand</option>
+                    <option value="1" data-i18n="toolbar.autotune">Autotune</option>
+                </select>
+            </div>
+
+            <!-- Status Info -->
+            <div class="flex items-center gap-x-2 ml-0 md:ml-auto">
+                <div id="rangeDisplay" class="info-badge">0-119</div>
+                <div id="modeDisplay" class="info-badge mode">Tone | Frequency</div>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <main class="flex-1 p-4 min-h-0 relative" style="background: rgba(0, 0, 0, 0.1);">
+            <div id="canvasContainer" class="relative w-full h-full flex items-center justify-center border border-[var(--color-border)] rounded-lg overflow-auto custom-scrollbar">
+                <canvas id="canvas" width="840" height="512" class="rounded-md cursor-crosshair"></canvas>
+                <div id="dropOverlay" class="absolute inset-0 bg-blue-600/20 border-2 border-dashed border-blue-500 rounded-lg hidden items-center justify-center pointer-events-none z-10">
+                    <div class="flex flex-col items-center gap-y-2 px-6 py-4 rounded-lg" style="background: rgba(var(--color-bg-tertiary), 0.9);">
+                        <i class="fas fa-upload text-3xl"></i>
+                        <span data-i18n="canvas.dropFile" class="font-semibold">Drop your .sfx file here!</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <footer class="flex items-center justify-between h-7 px-4 border-t border-[var(--color-border)]" style="background: var(--color-bg-primary); color: var(--color-text-secondary);">
+            <div id="statusText" class="flex-1 truncate text-xs" data-i18n="status.ready">Ready</div>
+            <div class="hidden md:block mx-4 text-xs" style="color: var(--color-text-muted);" data-i18n="footer.credits">CVSoundFX-Web © 2025 Amy Bienvenu</div>
+            <div class="flex items-center gap-x-3 text-xs">
+                <i class="fas fa-music"></i>
+                <i class="fas fa-volume-up" id="audioIcon"></i>
+            </div>
+        </footer>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileInput" class="hidden" accept=".sfx">
+    </div>
+
+    <!-- Modal for About/Controls -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-4">
+        <div id="modal-content" class="modal-content w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <header id="modal-header" class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+                <h2 id="modal-title" class="text-lg font-semibold" style="color: var(--color-text-primary);"></h2>
+                <button id="modal-close" class="text-2xl font-bold leading-none cursor-pointer" style="color: var(--color-text-secondary);">&times;</button>
+            </header>
+            <div id="modal-body" class="p-6 overflow-y-auto custom-scrollbar" style="color: var(--color-text-secondary);"></div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // =============================================
+        // COMPLETE INTERNATIONALIZATION SYSTEM
+        // =============================================
+        const i18n = {
+            en: {
+                menu: { 
+                    file: 'File', edit: 'Edit', theme: 'Theme', help: 'Help', 
+                    newSound: 'New Sound', open: 'Open...', save: 'Save', 
+                    importSpaceship: 'Import Spaceship', importLaser: 'Import Laser', importExplosion: 'Import Explosion', 
+                    exportAsm: 'Export ASM...', exportCvbasic: 'Export CVBASIC...', 
+                    clearAll: 'Clear All', selectAll: 'Select All Range', 
+                    controls: 'Controls Guide', about: 'About' 
+                },
+                theme: { dark: 'Dark', crystal: 'Crystal', coleco: 'ColecoVision' },
+                toolbar: { 
+                    play: 'Play', stop: 'Stop', 
+                    tone: 'Tone', periodicNoise: 'Periodic Noise', whiteNoise: 'White Noise', 
+                    frequency: 'Frequency', volume: 'Volume', start: 'Start', end: 'End', 
+                    freeHand: 'Free Hand', autotune: 'Autotune' 
+                },
+                canvas: { dropFile: 'Drop your .sfx file here!' },
+                status: { 
+                    ready: 'Ready', newSound: 'New sound created.', playing: 'Playing sound effect...', 
+                    stopped: 'Playback stopped.', saved: 'File saved successfully.', 
+                    loaded: 'loaded - {0} sequences imported.', exported: 'exported successfully.',
+                    spaceshipDemo: 'Spaceship engine demo loaded.', laserDemo: 'Laser blast demo loaded.', 
+                    explosionDemo: 'Explosion demo loaded.', soundMode: 'Sound mode set to: {0}',
+                    cursorMode: 'Cursor mode set to: {0}', frequencyMode: 'Frequency mode set to: {0}',
+                    cleared: 'All data cleared.', rangeSelected: 'Full range selected (0-119).',
+                    rangeSet: 'Range set: {0}-{1}', draggingStart: 'Dragging START to {0}',
+                    draggingEnd: 'Dragging END to {0}', handleHover: '{0} handle - drag to move',
+                    editReady: 'Ready to edit. Drag handles to set range.', position: 'Pos {0}: {1} = {2}',
+                    positionStart: 'START position set: {0}', positionEnd: 'END position set: {0}',
+                    dropError: 'Error: Please drop a valid .sfx file.',
+                    controlsDisplayed: 'Controls guide displayed.', aboutDisplayed: 'About information displayed.'
+                },
+                prompts: { 
+                    labelName: 'Enter a label name for the sound:', 
+                    includeHeader: 'Include header code with the play_sound procedure?' 
+                },
+                footer: { credits: "CVSoundFX-Web © 2025 Amy Bienvenu" },
+                controls: { 
+                    title: 'Controls Guide', 
+                    content: `<h3 class="font-bold mb-2" style="color: var(--color-text-primary);">MOUSE CONTROLS</h3>
+                              <ul class="list-disc list-inside space-y-1 mb-4">
+                                  <li>Drag <b>S</b>/<b>E</b> handles to set the playback range.</li>
+                                  <li>Click bars to edit based on the selected cursor mode:</li>
+                                  <ul class="list-disc list-inside ml-6">
+                                      <li><b>Frequency:</b> Change pitch/tone.</li>
+                                      <li><b>Volume:</b> Change loudness (0-15).</li>
+                                      <li><b>Start/End:</b> Set range boundaries with a click.</li>
+                                  </ul>
+                              </ul>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">FILE FORMATS</h3>
+                              <ul class="list-disc list-inside space-y-1">
+                                  <li><b>.sfx:</b> Native format for this editor.</li>
+                                  <li><b>.s:</b> Assembly export for development.</li>
+                                  <li><b>.bas:</b> CVBASIC export for IntyBASIC/CVBasic.</li>
+                              </ul>` 
+                },
+                about: { 
+                    title: 'About CVSoundFX-Web', 
+                    content: `<p class="mb-4">A professional, web-based sound effect editor for the ColecoVision sound chip.</p>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">FEATURES</h3>
+                              <ul class="list-disc list-inside space-y-1 mb-4">
+                                  <li>Real-time audio synthesis via Web Audio API.</li>
+                                  <li>Visual waveform and parameter editing.</li>
+                                  <li>Drag & drop support for <code>.sfx</code> files.</li>
+                                  <li>Export to Assembly and CVBASIC formats.</li>
+                              </ul>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">CREDITS</h3>
+                              <ul class="list-disc list-inside">
+                                  <li>Original CVSoundFX (Java) © 2014 Amy Bienvenu</li>
+                                  <li>CVBasic Converter logic by Oscar Toledo</li>
+                                  <li>Web version created in 2025 by Amy Bienvenu with AI assistance</li>
+                              </ul>
+                              <p class="mt-6 text-center" style="color: var(--color-text-muted);">Created with ❤️ for the retro game development community.</p>` 
+                }
+            },
+            fr: {
+                menu: { 
+                    file: 'Fichier', edit: 'Édition', theme: 'Thème', help: 'Aide',
+                    newSound: 'Nouveau Son', open: 'Ouvrir...', save: 'Sauvegarder',
+                    importSpaceship: 'Importer Vaisseau', importLaser: 'Importer Laser', importExplosion: 'Importer Explosion',
+                    exportAsm: 'Exporter ASM...', exportCvbasic: 'Exporter CVBASIC...',
+                    clearAll: 'Tout Effacer', selectAll: 'Sélectionner Tout',
+                    controls: 'Guide des Contrôles', about: 'À Propos'
+                },
+                theme: { dark: 'Sombre', crystal: 'Cristal', coleco: 'ColecoVision' },
+                toolbar: {
+                    play: 'Jouer', stop: 'Arrêter',
+                    tone: 'Ton', periodicNoise: 'Bruit Périodique', whiteNoise: 'Bruit Blanc',
+                    frequency: 'Fréquence', volume: 'Volume', start: 'Début', end: 'Fin',
+                    freeHand: 'Main Libre', autotune: 'Auto-accord'
+                },
+                canvas: { dropFile: 'Déposez votre fichier .sfx ici!' },
+                status: {
+                    ready: 'Prêt', newSound: 'Nouveau son créé.', playing: 'Lecture de l\'effet sonore...',
+                    stopped: 'Lecture arrêtée.', saved: 'Fichier sauvegardé avec succès.',
+                    loaded: 'chargé - {0} séquences importées.', exported: 'exporté avec succès.',
+                    spaceshipDemo: 'Démo vaisseau spatial chargée.', laserDemo: 'Démo laser chargée.',
+                    explosionDemo: 'Démo explosion chargée.', soundMode: 'Mode son défini sur: {0}',
+                    cursorMode: 'Mode curseur défini sur: {0}', frequencyMode: 'Mode fréquence défini sur: {0}',
+                    cleared: 'Toutes les données effacées.', rangeSelected: 'Plage complète sélectionnée (0-119).',
+                    rangeSet: 'Plage définie: {0}-{1}', draggingStart: 'Glissement DÉBUT vers {0}',
+                    draggingEnd: 'Glissement FIN vers {0}', handleHover: 'Poignée {0} - glisser pour déplacer',
+                    editReady: 'Prêt à éditer. Glissez les poignées pour définir la plage.', position: 'Pos {0}: {1} = {2}',
+                    positionStart: 'Position DÉBUT définie: {0}', positionEnd: 'Position FIN définie: {0}',
+                    dropError: 'Erreur: Veuillez déposer un fichier .sfx valide.',
+                    controlsDisplayed: 'Guide des contrôles affiché.', aboutDisplayed: 'Informations À Propos affichées.'
+                },
+                prompts: {
+                    labelName: 'Entrez un nom d\'étiquette pour le son:',
+                    includeHeader: 'Inclure le code d\'en-tête avec la procédure play_sound?'
+                },
+                footer: { credits: "CVSoundFX-Web © 2025 Amy Bienvenu" },
+                controls: {
+                    title: 'Guide des Contrôles',
+                    content: `<h3 class="font-bold mb-2" style="color: var(--color-text-primary);">CONTRÔLES SOURIS</h3>
+                              <ul class="list-disc list-inside space-y-1 mb-4">
+                                  <li>Glissez les poignées <b>S</b>/<b>E</b> pour définir la plage de lecture.</li>
+                                  <li>Cliquez sur les barres pour éditer selon le mode curseur sélectionné:</li>
+                                  <ul class="list-disc list-inside ml-6">
+                                      <li><b>Fréquence:</b> Changer la hauteur/ton.</li>
+                                      <li><b>Volume:</b> Changer l'intensité (0-15).</li>
+                                      <li><b>Début/Fin:</b> Définir les limites de plage d'un clic.</li>
+                                  </ul>
+                              </ul>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">FORMATS DE FICHIER</h3>
+                              <ul class="list-disc list-inside space-y-1">
+                                  <li><b>.sfx:</b> Format natif pour cet éditeur.</li>
+                                  <li><b>.s:</b> Export assembleur pour le développement.</li>
+                                  <li><b>.bas:</b> Export CVBASIC pour IntyBASIC/CVBasic.</li>
+                              </ul>`
+                },
+                about: {
+                    title: 'À Propos de CVSoundFX-Web',
+                    content: `<p class="mb-4">Un éditeur d'effets sonores professionnel basé sur le web pour la puce sonore ColecoVision.</p>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">FONCTIONNALITÉS</h3>
+                              <ul class="list-disc list-inside space-y-1 mb-4">
+                                  <li>Synthèse audio en temps réel via l'API Web Audio.</li>
+                                  <li>Édition visuelle de forme d'onde et de paramètres.</li>
+                                  <li>Support glisser-déposer pour les fichiers <code>.sfx</code>.</li>
+                                  <li>Export vers les formats Assembly et CVBASIC.</li>
+                              </ul>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">CRÉDITS</h3>
+                              <ul class="list-disc list-inside">
+                                  <li>CVSoundFX original (Java) © 2014 Amy Bienvenu</li>
+                                  <li>Logique convertisseur CVBasic par Oscar Toledo</li>
+                                  <li>Version web créée en 2025 par Amy Bienvenu avec assistance IA</li>
+                              </ul>
+                              <p class="mt-6 text-center" style="color: var(--color-text-muted);">Créé avec ❤️ pour la communauté de développement rétro.</p>`
+                }
+            },
+            es: {
+                menu: { 
+                    file: 'Archivo', edit: 'Editar', theme: 'Tema', help: 'Ayuda',
+                    newSound: 'Nuevo Sonido', open: 'Abrir...', save: 'Guardar',
+                    importSpaceship: 'Importar Nave', importLaser: 'Importar Láser', importExplosion: 'Importar Explosión',
+                    exportAsm: 'Exportar ASM...', exportCvbasic: 'Exportar CVBASIC...',
+                    clearAll: 'Limpiar Todo', selectAll: 'Seleccionar Todo',
+                    controls: 'Guía de Controles', about: 'Acerca de'
+                },
+                theme: { dark: 'Oscuro', crystal: 'Cristal', coleco: 'ColecoVision' },
+                toolbar: {
+                    play: 'Reproducir', stop: 'Parar',
+                    tone: 'Tono', periodicNoise: 'Ruido Periódico', whiteNoise: 'Ruido Blanco',
+                    frequency: 'Frecuencia', volume: 'Volumen', start: 'Inicio', end: 'Fin',
+                    freeHand: 'Mano Libre', autotune: 'Auto-afinación'
+                },
+                canvas: { dropFile: '¡Suelta tu archivo .sfx aquí!' },
+                status: {
+                    ready: 'Listo', newSound: 'Nuevo sonido creado.', playing: 'Reproduciendo efecto de sonido...',
+                    stopped: 'Reproducción detenida.', saved: 'Archivo guardado exitosamente.',
+                    loaded: 'cargado - {0} secuencias importadas.', exported: 'exportado exitosamente.',
+                    spaceshipDemo: 'Demo de nave espacial cargada.', laserDemo: 'Demo de láser cargada.',
+                    explosionDemo: 'Demo de explosión cargada.', soundMode: 'Modo de sonido establecido en: {0}',
+                    cursorMode: 'Modo de cursor establecido en: {0}', frequencyMode: 'Modo de frecuencia establecido en: {0}',
+                    cleared: 'Todos los datos limpiados.', rangeSelected: 'Rango completo seleccionado (0-119).',
+                    rangeSet: 'Rango establecido: {0}-{1}', draggingStart: 'Arrastrando INICIO a {0}',
+                    draggingEnd: 'Arrastrando FIN a {0}', handleHover: 'Manilla {0} - arrastrar para mover',
+                    editReady: 'Listo para editar. Arrastra las manillas para establecer el rango.', position: 'Pos {0}: {1} = {2}',
+                    positionStart: 'Posición INICIO establecida: {0}', positionEnd: 'Posición FIN establecida: {0}',
+                    dropError: 'Error: Por favor suelta un archivo .sfx válido.',
+                    controlsDisplayed: 'Guía de controles mostrada.', aboutDisplayed: 'Información Acerca de mostrada.'
+                },
+                prompts: {
+                    labelName: 'Ingresa un nombre de etiqueta para el sonido:',
+                    includeHeader: '¿Incluir código de encabezado con el procedimiento play_sound?'
+                },
+                footer: { credits: "CVSoundFX-Web © 2025 Amy Bienvenu" },
+                controls: {
+                    title: 'Guía de Controles',
+                    content: `<h3 class="font-bold mb-2" style="color: var(--color-text-primary);">CONTROLES DEL MOUSE</h3>
+                              <ul class="list-disc list-inside space-y-1 mb-4">
+                                  <li>Arrastra las manillas <b>S</b>/<b>E</b> para establecer el rango de reproducción.</li>
+                                  <li>Haz clic en las barras para editar según el modo de cursor seleccionado:</li>
+                                  <ul class="list-disc list-inside ml-6">
+                                      <li><b>Frecuencia:</b> Cambiar tono/altura.</li>
+                                      <li><b>Volumen:</b> Cambiar intensidad (0-15).</li>
+                                      <li><b>Inicio/Fin:</b> Establecer límites de rango con un clic.</li>
+                                  </ul>
+                              </ul>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">FORMATOS DE ARCHIVO</h3>
+                              <ul class="list-disc list-inside space-y-1">
+                                  <li><b>.sfx:</b> Formato nativo para este editor.</li>
+                                  <li><b>.s:</b> Exportación Assembly para desarrollo.</li>
+                                  <li><b>.bas:</b> Exportación CVBASIC para IntyBASIC/CVBasic.</li>
+                              </ul>`
+                },
+                about: {
+                    title: 'Acerca de CVSoundFX-Web',
+                    content: `<p class="mb-4">Un editor profesional de efectos de sonido basado en web para el chip de sonido ColecoVision.</p>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">CARACTERÍSTICAS</h3>
+                              <ul class="list-disc list-inside space-y-1 mb-4">
+                                  <li>Síntesis de audio en tiempo real vía API Web Audio.</li>
+                                  <li>Edición visual de forma de onda y parámetros.</li>
+                                  <li>Soporte arrastrar y soltar para archivos <code>.sfx</code>.</li>
+                                  <li>Exportación a formatos Assembly y CVBASIC.</li>
+                              </ul>
+                              <h3 class="font-bold mb-2" style="color: var(--color-text-primary);">CRÉDITOS</h3>
+                              <ul class="list-disc list-inside">
+                                  <li>CVSoundFX original (Java) © 2014 Amy Bienvenu</li>
+                                  <li>Lógica convertidor CVBasic por Oscar Toledo</li>
+                                  <li>Versión web creada en 2025 por Amy Bienvenu con asistencia IA</li>
+                              </ul>
+                              <p class="mt-6 text-center" style="color: var(--color-text-muted);">Creado con ❤️ para la comunidad de desarrollo retro.</p>`
+                }
+            }
+        };
+
+        let currentLang = 'en';
+
+        function t(key, ...args) {
+            const keys = key.split('.');
+            let value = i18n[currentLang];
+            for (const k of keys) { 
+                value = value?.[k]; 
+            }
+            if (!value) {
+                // Fallback to English if translation is missing
+                value = i18n.en;
+                for (const k of keys) { 
+                    value = value?.[k]; 
+                }
+            }
+            if (!value) return key;
+            return value.replace(/{(\d+)}/g, (match, index) => args[parseInt(index)] || match);
+        }
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            
+            // Update language button states
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                if (el.tagName === 'OPTION') {
+                    el.textContent = t(key);
+                } else {
+                    // For elements with icons, only update text nodes
+                    const textNode = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                    if (textNode) {
+                        textNode.textContent = t(key);
+                    } else if (!el.querySelector('i')) {
+                        // If no icon, update whole text content
+                        el.textContent = t(key);
+                    } else {
+                        // Update only the span inside
+                        const span = el.querySelector('span[data-i18n]');
+                        if (span) span.textContent = t(span.dataset.i18n);
+                    }
+                }
+            });
+            
+            document.title = 'CVSoundFX-Web - Sound Editor';
+        }
+
+        // =============================================
+        // MODAL SYSTEM
+        // =============================================
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalCloseBtn = document.getElementById('modal-close');
+
+        function showModal(titleKey, contentKey) {
+            modalTitle.textContent = t(titleKey);
+            modalBody.innerHTML = t(contentKey);
+            modalOverlay.classList.remove('hidden');
+            modalOverlay.classList.add('flex');
+        }
+
+        function hideModal() {
+            modalOverlay.classList.add('hidden');
+            modalOverlay.classList.remove('flex');
+        }
+
+        modalCloseBtn.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) hideModal();
+        });
+
+        // =============================================
+        // AUDIO CLASSES (SAME AS BEFORE)
+        // =============================================
+        class AudioDatum {
+            constructor() { this.period = 0x44; this.attenuation = 3; }
+            p(mode) { return mode > 0 ? this.period * 2 : this.period; }
+            autotune(mode) { let n; switch (mode) { case 0: n = Math.floor(12 * Math.log(6839.9278 / this.period) / Math.log(2)); this.period = Math.floor(6839.9278 / Math.pow(2, n / 12)); break; case 1: n = Math.floor(12 * Math.log(455.9951 / this.period) / Math.log(2)); this.period = Math.floor(455.9951 / Math.pow(2, n / 12)); break; } }
+        }
+
+        class AudioData {
+            constructor() { this.mode = 0; this.size = 120; this.startAt = 0; this.endAt = this.size - 1; this.sequence = []; this.reset(); }
+            reset() { this.startAt = 0; this.endAt = this.size - 1; this.sequence = []; for (let i = 0; i < this.size; i++) { this.sequence[i] = new AudioDatum(); } this.createSpaceshipDemo(); this.mode = 0; }
+            clear() { this.startAt = 0; this.endAt = this.size - 1; this.sequence = []; for (let i = 0; i < this.size; i++) { this.sequence[i] = new AudioDatum(); this.sequence[i].period = 100; this.sequence[i].attenuation = 8; } }
+            createSpaceshipDemo() { for (let i = 0; i < 120; i++) { if (i < 18) { this.sequence[i].period = 300 - (i * 8); this.sequence[i].attenuation = Math.min(14, 18 - i); } else if (i < 58) { this.sequence[i].period = 155 + Math.sin(i * 0.5) * 9; this.sequence[i].attenuation = 3 + Math.sin(i * 0.3) * 2; } else if (i < 80) { this.sequence[i].period = 130 + (i % 7) * 15; this.sequence[i].attenuation = (i % 4 === 0) ? 2 : 8; } else if (i < 106) { this.sequence[i].period = 100 + Math.cos(i * 0.7) * 40; this.sequence[i].attenuation = Math.floor(1 + Math.abs(Math.sin(i * 0.4)) * 10); } else { this.sequence[i].period = 250 + (i - 110) * 30; this.sequence[i].attenuation = Math.floor(Math.min(13, (i - 106))); } this.sequence[i].period = Math.floor(Math.max(1, Math.min(1023, Math.floor(this.sequence[i].period)))); this.sequence[i].attenuation = Math.floor(Math.max(0, Math.min(15, Math.floor(this.sequence[i].attenuation)))); } this.startAt = 0; this.endAt = 119; }
+            createLaserDemo() { for (let i = 0; i < 120; i++) { if (i < 6) { this.sequence[i].period = 450 - (i * 50); this.sequence[i].attenuation = i * 3; } else if (i < 15) { this.sequence[i].period = 200 + Math.sin(i * 2) * 5; this.sequence[i].attenuation = 1 + Math.sin(i * 1.5) * 2; } else if (i < 25) { this.sequence[i].period = 205 + Math.sin(i * 0.8) * 8; this.sequence[i].attenuation = 2; } else if (i < 35) { const p = (i - 25) / 10; this.sequence[i].period = 225 + (p * 80); this.sequence[i].attenuation = 2 + (p * 8); } else { this.sequence[i].period = 300; this.sequence[i].attenuation = 15; } this.sequence[i].period = Math.floor(Math.max(1, Math.min(1023, Math.floor(this.sequence[i].period)))); this.sequence[i].attenuation = Math.floor(Math.max(0, Math.min(14, Math.floor(this.sequence[i].attenuation)))); } this.startAt = 0; this.endAt = 40; }
+            createExplosionDemo() { for (let i = 0; i < 120; i++) { if (i < 5) { this.sequence[i].period = 115 + (i % 3) * 5; this.sequence[i].attenuation = 0; } else if (i < 20) { this.sequence[i].period = 120 + Math.random() * 30; this.sequence[i].attenuation = 1 + Math.floor(Math.random() * 4); } else if (i < 40) { this.sequence[i].period = 130 + (i % 5) * 10; this.sequence[i].attenuation = 3 + Math.floor(Math.random() * 6); } else if (i < 70) { const p = (i - 40) / 30; this.sequence[i].period = 140 + (p * 60); this.sequence[i].attenuation = 5 + Math.floor(p * 8); } else { this.sequence[i].period = 200; this.sequence[i].attenuation = 15; } this.sequence[i].period = Math.floor(Math.max(1, Math.min(1023, Math.floor(this.sequence[i].period)))); this.sequence[i].attenuation = Math.floor(Math.max(0, Math.min(15, Math.floor(this.sequence[i].attenuation)))); } this.startAt = 0; this.endAt = 80; }
+        }
+
+        class AudioChip {
+            constructor() { this.data = null; this.amplitude = new Array(16); this.NTSC_FRAME = 3732; this.ShiftRegister = 0x4000; this.ShiftRegister_PRESET = 0x4000; this.MAX_WAVE_AMPLITUDE = 127; this.waveSample = null; this.waveSampleSize = 0; this.audioContext = null; this.gainNode = null; this.isPlaying = false; this.initializeAmplitudeTable(); this.initAudio(); }
+            initAudio() { try { this.audioContext = new(window.AudioContext || window.webkitAudioContext)(); this.gainNode = this.audioContext.createGain(); this.gainNode.connect(this.audioContext.destination); this.gainNode.gain.value = 0.3; } catch (e) { console.error('Web Audio API not supported:', e); } }
+            reset() { this.ShiftRegister = this.ShiftRegister_PRESET; }
+            setAudio(data) { this.data = data; }
+            generateSound() { if (!this.data) return; this.reset(); let counter = 0, flipflop = true, feedback; let ticksRate = 3579545.45 / 16 / 44100; let accumulator = 0, accumulatorCounter = 0, accumulatorCount = 0; this.waveSample = []; this.waveSampleSize = 0; for (let index = this.data.startAt; index <= this.data.endAt; index++) { const d = this.data.sequence[index]; if (d.attenuation === 15) { counter = 0; flipflop = true; } for (let count = 0; count < this.NTSC_FRAME; count++) { accumulatorCounter += 1; accumulatorCount++; accumulator += flipflop ? this.amplitude[d.attenuation] : 0; if (accumulatorCounter >= ticksRate) { this.waveSample.push(accumulator * this.MAX_WAVE_AMPLITUDE / accumulatorCount); this.waveSampleSize++; accumulatorCounter -= ticksRate; accumulator = 0; accumulatorCount = 0; } counter++; if (d.p(this.data.mode) > 0) { if (counter >= d.p(this.data.mode)) { counter %= d.p(this.data.mode); switch (this.data.mode) { case 0: flipflop = !flipflop; break; case 1: feedback = this.ShiftRegister & 1; this.ShiftRegister = (this.ShiftRegister >>> 1) | (feedback << 14); flipflop = (this.ShiftRegister & 1) === 1; break; case 2: feedback = (this.ShiftRegister ^ (this.ShiftRegister >>> 1)) & 1; this.ShiftRegister = (this.ShiftRegister >>> 1) | (feedback << 14); flipflop = (this.ShiftRegister & 1) === 1; break; } } } } if (accumulatorCounter > 0) { this.waveSample.push(accumulator * this.MAX_WAVE_AMPLITUDE / accumulatorCount); this.waveSampleSize++; } } }
+            startPlaying() { if (!this.audioContext || this.isPlaying) return; if (this.audioContext.state === 'suspended') { this.audioContext.resume(); } this.generateSound(); if (!this.waveSample || this.waveSample.length === 0) return; const audioBuffer = this.audioContext.createBuffer(1, this.waveSample.length, 44100); const channelData = audioBuffer.getChannelData(0); for (let i = 0; i < this.waveSample.length; i++) { channelData[i] = this.waveSample[i] / 127.0; } const source = this.audioContext.createBufferSource(); source.buffer = audioBuffer; source.connect(this.gainNode); this.isPlaying = true; source.onended = () => { this.isPlaying = false; }; source.start(); this.currentSource = source; }
+            stopPlaying() { if (this.currentSource) { this.currentSource.stop(); this.currentSource = null; } this.isPlaying = false; }
+            initializeAmplitudeTable() { this.amplitude[0] = 1.0; for (let i = 1; i < 15; i++) { this.amplitude[i] = this.amplitude[i - 1] / 1.259; } this.amplitude[15] = 0.0; }
+        }
+
+        // =============================================
+        // MAIN APPLICATION CLASS
+        // =============================================
+        class CVSoundFXApp {
+            constructor() {
+                this.data = new AudioData();
+                this.chip = new AudioChip();
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.cursorMode = 0;
+                this.autotune = false;
+                this.isDragging = false;
+                this.dragHandle = null;
+                this.handleHover = null;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupDragAndDrop();
+                this.setupMenus();
+                this.setupLanguage();
+                this.setupThemeSwitcher();
+                this.setupResponsive();
+                this.render();
+                this.updateDisplays();
+                this.updateStatus(t('status.spaceshipDemo'));
+            }
+
+            setupThemeSwitcher() {
+                const themeButtons = document.querySelectorAll('.theme-btn');
+                const body = document.body;
+                const savedTheme = localStorage.getItem('cvsoundfx-theme') || 'theme-dark';
+
+                const applyTheme = (themeName) => {
+                    // Remove existing theme classes
+                    body.className = body.className.replace(/theme-\w+/g, '');
+                    body.classList.add(themeName);
+                    localStorage.setItem('cvsoundfx-theme', themeName);
+                    this.render(); // Re-render canvas with new theme colors
+                };
+
+                themeButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        applyTheme(btn.dataset.theme);
+                    });
+                });
+
+                applyTheme(savedTheme);
+            }
+
+            setupLanguage() {
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        updateLanguage(e.target.dataset.lang);
+                        this.updateDisplays();
+                        this.updateStatus(t('status.ready'));
+                    });
+                });
+                updateLanguage('en');
+            }
+
+            setupEventListeners() {
+                this.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.onMouseUp(e));
+                this.canvas.addEventListener('mouseleave', (e) => this.onMouseLeave(e));
+
+                document.getElementById('playBtn').addEventListener('click', () => { this.chip.setAudio(this.data); this.chip.startPlaying(); this.updateStatus(t('status.playing')); document.getElementById('audioIcon').className = 'fas fa-volume-up animate-pulse'; });
+                document.getElementById('stopBtn').addEventListener('click', () => { this.chip.stopPlaying(); this.updateStatus(t('status.stopped')); document.getElementById('audioIcon').className = 'fas fa-volume-up'; });
+
+                document.getElementById('soundMode').addEventListener('change', (e) => { this.data.mode = parseInt(e.target.value); this.updateDisplays(); this.updateStatus(t('status.soundMode', t(`toolbar.${['tone','periodicNoise','whiteNoise'][this.data.mode]}`))); });
+                document.getElementById('cursorMode').addEventListener('change', (e) => { this.cursorMode = parseInt(e.target.value); this.updateDisplays(); this.updateStatus(t('status.cursorMode', t(`toolbar.${['frequency','volume','start','end'][this.cursorMode]}`))); });
+                document.getElementById('frequencyMode').addEventListener('change', (e) => { this.autotune = e.target.value === '1'; this.updateStatus(t('status.frequencyMode', t(`toolbar.${this.autotune ? 'autotune' : 'freeHand'}`))); });
+
+                document.getElementById('fileInput').addEventListener('change', (e) => this.loadFile(e));
+            }
+
+            setupMenus() {
+                // Menu button click handlers
+                document.querySelectorAll('[data-menu]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const menuId = e.currentTarget.dataset.menu + '-menu';
+                        const menu = document.getElementById(menuId);
+                        const isVisible = menu.classList.contains('show');
+                        
+                        // Hide all dropdowns first
+                        document.querySelectorAll('.menu-dropdown').forEach(m => {
+                            m.classList.remove('show');
+                        });
+                        
+                        // Show this dropdown if it wasn't visible
+                        if (!isVisible) {
+                            menu.classList.add('show');
+                        }
+                    });
+                });
+
+                // Click outside to close menus
+                document.addEventListener('click', () => {
+                    document.querySelectorAll('.menu-dropdown').forEach(m => {
+                        m.classList.remove('show');
+                    });
+                });
+
+                // Menu action handlers
+                document.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.handleMenuAction(e.currentTarget.dataset.action);
+                        // Close all menus after action
+                        document.querySelectorAll('.menu-dropdown').forEach(m => {
+                            m.classList.remove('show');
+                        });
+                    });
+                });
+            }
+
+            handleMenuAction(action) {
+                switch (action) {
+                    case 'new': this.data.clear(); this.render(); this.updateDisplays(); this.updateStatus(t('status.newSound')); break;
+                    case 'open': document.getElementById('fileInput').click(); break;
+                    case 'save': this.saveFile(); break;
+                    case 'demo-spaceship': this.loadDemo('spaceship'); break;
+                    case 'demo-laser': this.loadDemo('laser'); break;
+                    case 'demo-explosion': this.loadDemo('explosion'); break;
+                    case 'export': this.exportASM(); break;
+                    case 'export-cvbasic': this.exportCVBASIC(); break;
+                    case 'clear': this.data.clear(); this.render(); this.updateDisplays(); this.updateStatus(t('status.cleared')); break;
+                    case 'select-all': this.data.startAt = 0; this.data.endAt = 119; this.render(); this.updateDisplays(); this.updateStatus(t('status.rangeSelected')); break;
+                    case 'controls': showModal('controls.title', 'controls.content'); this.updateStatus(t('status.controlsDisplayed')); break;
+                    case 'about': showModal('about.title', 'about.content'); this.updateStatus(t('status.aboutDisplayed')); break;
+                }
+            }
+            
+            loadDemo(type) {
+                 switch(type) {
+                     case 'spaceship': this.data.createSpaceshipDemo(); this.data.mode = 0; this.updateStatus(t('status.spaceshipDemo')); break;
+                     case 'laser': this.data.createLaserDemo(); this.data.mode = 0; this.updateStatus(t('status.laserDemo')); break;
+                     case 'explosion': this.data.createExplosionDemo(); this.data.mode = 2; this.updateStatus(t('status.explosionDemo')); break;
+                 }
+                 document.getElementById('soundMode').value = this.data.mode.toString();
+                 this.render(); this.updateDisplays();
+            }
+
+            setupDragAndDrop() {
+                const container = document.getElementById('canvasContainer');
+                const overlay = document.getElementById('dropOverlay');
+                let dragCounter = 0;
+                container.addEventListener('dragenter', (e) => { e.preventDefault(); dragCounter++; container.classList.add('border-blue-500'); overlay.classList.remove('hidden'); overlay.classList.add('flex'); });
+                container.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+                container.addEventListener('dragleave', (e) => { e.preventDefault(); dragCounter--; if (dragCounter === 0) { container.classList.remove('border-blue-500'); overlay.classList.add('hidden'); }});
+                container.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dragCounter = 0;
+                    container.classList.remove('border-blue-500');
+                    overlay.classList.add('hidden');
+                    const sfxFile = Array.from(e.dataTransfer.files).find(f => f.name.toLowerCase().endsWith('.sfx'));
+                    if (sfxFile) { this.loadFileContent(sfxFile); } else { this.updateStatus(t('status.dropError')); }
+                });
+            }
+            
+            setupResponsive() {
+                window.addEventListener('resize', () => this.render());
+                this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.onMouseDown(this.touchToMouseEvent(e, 'mousedown')); });
+                this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (e.touches.length > 0) this.onMouseMove(this.touchToMouseEvent(e, 'mousemove')); });
+                this.canvas.addEventListener('touchend', (e) => { e.preventDefault(); this.onMouseUp(this.touchToMouseEvent(e, 'mouseup')); });
+            }
+
+            touchToMouseEvent(e, type) {
+                const touch = e.type === 'touchend' ? e.changedTouches[0] : e.touches[0];
+                return new MouseEvent(type, { clientX: touch.clientX, clientY: touch.clientY, buttons: type === 'mousemove' && this.isDragging ? 1 : 0 });
+            }
+
+            getMousePos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                return { x: (e.clientX - rect.left) * (this.canvas.width / rect.width), y: (e.clientY - rect.top) * (this.canvas.height / rect.height) };
+            }
+
+            isOverHandle(x, y) {
+                const startX = this.data.startAt * 7;
+                const endX = (this.data.endAt + 1) * 7;
+                if (x >= startX - 8 && x <= startX + 8 && y >= 5 && y <= 35) return 'start';
+                if (x >= endX - 8 && x <= endX + 8 && y >= 5 && y <= 35) return 'end';
+                return null;
+            }
+
+            onMouseDown(e) {
+                const pos = this.getMousePos(e);
+                const handle = this.isOverHandle(pos.x, pos.y);
+                if (handle) { this.isDragging = true; this.dragHandle = handle; this.canvas.style.cursor = 'ew-resize'; e.preventDefault(); }
+                else { this.isDragging = true; this.dragHandle = null; this.editCanvas(e); }
+            }
+
+            onMouseMove(e) {
+                const pos = this.getMousePos(e);
+                if (this.isDragging && this.dragHandle) {
+                    const newIndex = Math.max(0, Math.min(119, Math.floor(pos.x / 7)));
+                    if (this.dragHandle === 'start') { this.data.startAt = newIndex; if (this.data.startAt > this.data.endAt) { this.data.endAt = this.data.startAt; } this.updateStatus(t('status.draggingStart', newIndex)); }
+                    else { this.data.endAt = newIndex; if (this.data.endAt < this.data.startAt) { this.data.startAt = this.data.endAt; } this.updateStatus(t('status.draggingEnd', newIndex)); }
+                    this.render(); this.updateDisplays();
+                } else if (e.buttons === 1 && this.isDragging && !this.dragHandle) {
+                    this.editCanvas(e);
+                } else if (!this.isDragging) {
+                    const handle = this.isOverHandle(pos.x, pos.y);
+                    if (handle !== this.handleHover) {
+                        this.handleHover = handle;
+                        this.canvas.style.cursor = handle ? 'ew-resize' : 'crosshair';
+                        if (handle) this.updateStatus(t('status.handleHover', handle.toUpperCase()));
+                        this.render();
+                    }
+                }
+            }
+
+            onMouseUp(e) {
+                if (this.isDragging && this.dragHandle) { this.updateStatus(t('status.rangeSet', this.data.startAt, this.data.endAt)); }
+                this.isDragging = false; this.dragHandle = null; this.render();
+            }
+
+            onMouseLeave(e) { this.isDragging = false; this.dragHandle = null; this.handleHover = null; this.canvas.style.cursor = 'crosshair'; this.render(); }
+
+            editCanvas(e) {
+                const pos = this.getMousePos(e);
+                if (pos.x >= 0 && pos.x <= 839 && pos.y >= 0 && pos.y <= 511) {
+                    const i = Math.floor(pos.x / 7);
+                    if (!this.data.sequence[i]) return;
+                    switch (this.cursorMode) {
+                        case 0: this.data.sequence[i].period = Math.max(1, Math.min(1023, Math.floor(pos.y * 2 + 1))); if (this.autotune) { this.data.sequence[i].autotune(this.data.mode); } this.updateStatus(t('status.position', i, t('toolbar.frequency'), this.data.sequence[i].period)); break;
+                        case 1: this.data.sequence[i].attenuation = Math.min(15, Math.max(0, Math.floor(pos.y / 32))); this.updateStatus(t('status.position', i, t('toolbar.volume'), this.data.sequence[i].attenuation)); break;
+                        case 2: this.data.startAt = Math.min(119, Math.max(0, i)); if (this.data.startAt > this.data.endAt) { this.data.endAt = this.data.startAt; } this.updateStatus(t('status.positionStart', this.data.startAt)); break;
+                        case 3: this.data.endAt = Math.min(119, Math.max(0, i)); if (this.data.endAt < this.data.startAt) { this.data.startAt = this.data.endAt; } this.updateStatus(t('status.positionEnd', this.data.endAt)); break;
+                    }
+                    this.render(); this.updateDisplays();
+                }
+            }
+            
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            }
+
+            render() {
+                const styles = getComputedStyle(document.body);
+                const bgColor = styles.getPropertyValue('--color-bg-primary').trim();
+                const inactiveBarColor = styles.getPropertyValue('--color-bg-tertiary').trim();
+                const inactiveVolColor = styles.getPropertyValue('--color-border').trim();
+                const handleColor = styles.getPropertyValue('--color-accent-yellow').trim();
+                const handleHoverColor = styles.getPropertyValue('--color-accent-yellow-hover').trim();
+                const handleTextColor = document.body.classList.contains('theme-crystal') ? '#FFF' : '#000';
+                
+                const barStartColor = this.hexToRgb(styles.getPropertyValue('--color-canvas-bar-start').trim());
+                const barEndColor = this.hexToRgb(styles.getPropertyValue('--color-canvas-bar-end').trim());
+
+                this.ctx.fillStyle = bgColor;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (!this.data || !this.data.sequence) return;
+
+                for (let i = 0; i < this.data.sequence.length; i++) {
+                    const datum = this.data.sequence[i];
+                    const y = Math.floor(datum.period / 2);
+                    const y2 = datum.attenuation * 32;
+                    const barHeight = Math.max(1, 512 - y);
+
+                    if (i >= this.data.startAt && i <= this.data.endAt) {
+                        const ratio = datum.attenuation / 15;
+                        const r = Math.floor(barEndColor.r * (1 - ratio) + barStartColor.r * ratio);
+                        const g = Math.floor(barEndColor.g * (1 - ratio) + barStartColor.g * ratio);
+                        const b = Math.floor(barEndColor.b * (1 - ratio) + barStartColor.b * ratio);
+
+                        this.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                        this.ctx.fillRect(i * 7, y, 6, barHeight);
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        this.ctx.fillRect(i * 7, y2, 6, 2);
+                    } else {
+                        this.ctx.fillStyle = inactiveBarColor;
+                        this.ctx.fillRect(i * 7, y, 6, barHeight);
+                        this.ctx.fillStyle = inactiveVolColor;
+                        this.ctx.fillRect(i * 7, y2, 6, 2);
+                    }
+                }
+                const startX = this.data.startAt * 7;
+                const endX = (this.data.endAt + 1) * 7 - 1;
+                const drawHandle = (x, label, handleType) => {
+                    const isHover = this.handleHover === handleType || this.dragHandle === handleType;
+                    this.ctx.fillStyle = isHover ? handleHoverColor : handleColor;
+                    this.ctx.fillRect(x - 8, 5, 16, 22);
+                    this.ctx.fillStyle = handleTextColor; this.ctx.font = 'bold 11px sans-serif'; this.ctx.textAlign = 'center';
+                    this.ctx.fillText(label, x, 20);
+                };
+                drawHandle(startX, 'S', 'start');
+                drawHandle(endX, 'E', 'end');
+                this.ctx.textAlign = 'left';
+            }
+
+            updateDisplays() {
+                document.getElementById('rangeDisplay').textContent = `${this.data.startAt}-${this.data.endAt}`;
+                const soundModeText = t(`toolbar.${['tone','periodicNoise','whiteNoise'][this.data.mode]}`);
+                const cursorModeText = t(`toolbar.${['frequency','volume','start','end'][this.cursorMode]}`);
+                document.getElementById('modeDisplay').textContent = `${soundModeText} | ${cursorModeText}`;
+            }
+
+            updateStatus(message) { document.getElementById('statusText').textContent = message; }
+
+            exportCVBASIC() {
+                const label = prompt(t('prompts.labelName'), 'sound_example');
+                if (!label) return;
+                const includeHeader = confirm(t('prompts.includeHeader'));
+                let content = '';
+                if (includeHeader) { content += `\tON FRAME GOSUB play_sound\n\nplay_sound:\tPROCEDURE\n\tON sound_effect GOSUB sound_none, ${label}\n\tEND\n\nsound_none:\tPROCEDURE\n\tSOUND 2, , 0\n\tSOUND 3, , 0\n\tEND\n\n`; }
+                content += `${label}:\tPROCEDURE\n`;
+                if (this.data.mode === 1 || this.data.mode === 2) { content += `\tIF sound_state = 0 THEN\n\t\tSOUND 2, ,0\n\t\tSOUND 3,${this.data.mode === 1 ? 3 : 7}\n\tEND IF\n`; }
+                if (this.data.mode === 0) { content += `\tSOUND 2, #${label}_freq(sound_state), ${label}_vol(sound_state)\n\tSOUND 3, , 0\n`; } else { content += `\tSOUND 2, #${label}_freq(sound_state)\n\tSOUND 3, , ${label}_vol(sound_state)\n`; }
+                content += `\tsound_state = sound_state + 1\n\tIF sound_state = ${this.data.endAt - this.data.startAt + 1} THEN sound_effect = 0\n\tEND\n\n`;
+                const formatData = (name, transform) => { let c = `#${label}_${name}:\n`; let cnt = 0; for (let i = this.data.startAt; i <= this.data.endAt; i++) { if ((cnt % 16) === 0) c += `\tDATA ${name==='vol'?'BYTE ':''}`; c += transform(this.data.sequence[i]); c += (i === this.data.endAt || (cnt % 16) === 15) ? '\n' : ','; cnt++; } return c; };
+                content += formatData('freq', d => d.period);
+                content += formatData('vol', d => (d.attenuation ^ 15));
+                this.downloadFile(`${label}.bas`, content);
+                this.updateStatus('CVBASIC ' + t('status.exported'));
+            }
+            
+            saveFile() {
+                let content = `MODE ${this.data.mode}\n`;
+                content += `SIZE ${this.data.size}\n`;
+                content += `START ${this.data.startAt}\n`;
+                content += `END ${this.data.endAt}\n`;
+                for (let i = 0; i < this.data.sequence.length; i++) {
+                    const datum = this.data.sequence[i];
+                    content += `${datum.period} ${datum.attenuation}\n`;
+                }
+                this.downloadFile('sound_effect.sfx', content);
+                this.updateStatus(t('status.saved'));
+            }
+
+            loadFile(e) { const file = e.target.files[0]; if (file) this.loadFileContent(file); e.target.value = ''; }
+            
+            loadFileContent(file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const lines = event.target.result.split('\n');
+                    this.data.clear();
+                    let fileHeader = {};
+                    let dataLines = [];
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const parts = line.trim().split(' ');
+                        if (parts.length === 2) {
+                             const label = parts[0].toUpperCase();
+                             if (['MODE', 'SIZE', 'START', 'END'].includes(label)) {
+                                 fileHeader[label.toLowerCase()] = parseInt(parts[1]);
+                                 continue;
+                             }
+                        }
+                        dataLines.push(parts);
+                    }
+
+                    for (let i = 0; i < dataLines.length; i++) {
+                        if (i >= this.data.size) break;
+                        const dataLine = dataLines[i];
+                        if (dataLine.length >= 2) {
+                            this.data.sequence[i].period = parseInt(dataLine[0]);
+                            this.data.sequence[i].attenuation = parseInt(dataLine[1]);
+                        }
+                    }
+
+                    this.data.mode = fileHeader.mode ?? 0;
+                    this.data.size = fileHeader.size ?? 120;
+                    this.data.startAt = fileHeader.start ?? 0;
+                    this.data.endAt = fileHeader.end ?? (dataLines.length > 0 ? dataLines.length - 1 : 119);
+
+                    document.getElementById('soundMode').value = this.data.mode;
+                    this.render();
+                    this.updateDisplays();
+                    this.updateStatus(`"${file.name}" ` + t('status.loaded', dataLines.length));
+                };
+                reader.readAsText(file);
+            }
+
+            exportASM() {
+                let content = `\t.module sound\n\n\t.globl  sfx_sound_1\n\n\t.area _CODE\n\nsfx_sound_1:\n`;
+                for (let i = this.data.startAt; i <= this.data.endAt; i++) { const d = this.data.sequence[i]; content += `\t.db 0x40,0x${(d.period%256).toString(16).padStart(2,'0')},0x${(d.attenuation*16+Math.floor(d.period/256)).toString(16).padStart(2,'0')},1\n`; }
+                content += '\t.db 0x50\n';
+                this.downloadFile('sound_effect.s', content);
+                this.updateStatus('ASM ' + t('status.exported'));
+            }
+            
+            downloadFile(filename, content) {
+                 const a = document.createElement('a');
+                 a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
+                 a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+            }
+        }
+
+        // Initialize the app
+        new CVSoundFXApp();
+    });
+    </script>
+</body>
+</html>
