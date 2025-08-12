@@ -1140,7 +1140,7 @@
                 if (this.data.mode === 1 || this.data.mode === 2) { content += `\tIF sound_state = 0 THEN\n\t\tSOUND 2, ,0\n\t\tSOUND 3,${this.data.mode === 1 ? 3 : 7}\n\tEND IF\n`; }
                 if (this.data.mode === 0) { content += `\tSOUND 2, #${label}_freq(sound_state), ${label}_vol(sound_state)\n\tSOUND 3, , 0\n`; } else { content += `\tSOUND 2, #${label}_freq(sound_state)\n\tSOUND 3, , ${label}_vol(sound_state)\n`; }
                 content += `\tsound_state = sound_state + 1\n\tIF sound_state = ${this.data.endAt - this.data.startAt + 1} THEN sound_effect = 0\n\tEND\n\n`;
-                const formatData = (name, transform) => { let c = `#${label}_${name}:\n`; let cnt = 0; for (let i = this.data.startAt; i <= this.data.endAt; i++) { if ((cnt % 16) === 0) c += `\tDATA ${name==='vol'?'BYTE ':''}`; c += transform(this.data.sequence[i]); c += (i === this.data.endAt || (cnt % 16) === 15) ? '\n' : ','; cnt++; } return c; };
+                const formatData = (name, transform) => { let c = `${name==='vol'?'':'#'}${label}_${name}:\n`; let cnt = 0; for (let i = this.data.startAt; i <= this.data.endAt; i++) { if ((cnt % 16) === 0) c += `\tDATA ${name==='vol'?'BYTE ':''}`; c += transform(this.data.sequence[i]); c += (i === this.data.endAt || (cnt % 16) === 15) ? '\n' : ','; cnt++; } return c; };
                 content += formatData('freq', d => d.period);
                 content += formatData('vol', d => (d.attenuation ^ 15));
                 this.downloadFile(`${label}.bas`, content);
